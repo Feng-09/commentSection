@@ -3,6 +3,7 @@ import data from '/data.json'
 import CommentCard from './commentCard'
 import { MentionsInput, Mention } from 'react-mentions'
 import mentionStyle from './mentionStyle'
+import userPfp from '/images/user.jpg'
 
 function App() {
   const [chat, setChat] = useState(data)
@@ -15,6 +16,8 @@ function App() {
   const [render, setRender] = useState(false)
   const [replyingToId, setReplyingToId] = useState(null)
   const [mainInp, setMainInp] = useState(true)
+  const [user, setUser] = useState('')
+  const [form, setForm] = useState(true)
   const inpRef = useRef(null)
   let info = data
 
@@ -52,6 +55,7 @@ function App() {
     }
   ]
 
+  console.log(user)
   const replyClick = () => {
     //this is for focusing on the text area on clicking 'reply"
     if (window.screen.width < 768) {
@@ -83,9 +87,9 @@ function App() {
         "user": {
           "image": {
             "png": "./images/avatars/image-juliusomo.png",
-            "webp": "./images/avatars/image-juliusomo.webp"
+            "webp": "./images/avatars/user.jpg"
           },
-          "username": "juliusomo"
+          "username": user
         },
         "replies": [],
         "replyingTo": repliedTo
@@ -102,9 +106,9 @@ function App() {
         "user": {
           "image": {
             "png": "./images/avatars/image-juliusomo.png",
-            "webp": "./images/avatars/image-juliusomo.webp"
+            "webp": "./images/avatars/user.jpg"
           },
-          "username": "juliusomo"
+          "username": user
         },
         "replies": [],
         "replyingTo": repliedTo,
@@ -119,17 +123,19 @@ function App() {
   }
 
   return (
+    <>
+    {form ? (<Form setForm={setForm} setUser={setUser} />) : (
     <div className='min-h-screen h-fit min-w-screen w-full px-6 py-8 bg-[#f5f6fa] flex flex-col items-center'>
       {comments.sort((a, b) => b - a).map((comment, id) => {
         return (
           <div className='w-full max-w-3xl'>
-          <CommentCard comment={comment} info={info} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} />
+          <CommentCard comment={comment} info={info} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} user={user} />
           {comment.replies.map((reply, id) => {
             return (
               <div className='flex h-fit'>
                 <div className='w-[0.2rem] mr-[0.9rem] bg-[#67727e2f] text-[1px]'>.</div>
                 <div className='flex flex-col w-full'>
-                  <CommentCard comment={reply} info={info} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} setRender={setRender} />
+                  <CommentCard comment={reply} info={info} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} user={user} setRender={setRender} />
                 </div>
               </div>
             )
@@ -151,13 +157,25 @@ function App() {
          className='bg-white border-[#67727e2f] border-2 font-rubik h-24 w-full rounded-lg text-[#67727e] mb-6 overflow-y-auto'>
           <Mention data={users} trigger="@" markup="@[__display__]" appendSpaceOnAdd={true} className='text-[#5457b6] z-50 md:relative md:top-[1px] md:right-[1px]' />
         </MentionsInput>
-        <img src={data.currentUser.image.png} className="w-10 h-10" />
+        <img src={userPfp} className="w-12 h-12 rounded-full" />
         <div className='h-12 w-24 my-auto rounded-lg bg-[#5457b6] float-right relative bottom-12 hover:cursor-pointer hover:opacity-50'>
           <h1 className='my-auto leading-[3rem] text-lg font-semibold font-rubik text-center' onClick={addComment}>SEND</h1>
         </div>
       </div>
+    </div>)}
+    </>
+  )
+}
 
-    </div>
+function Form(props) {
+  return (
+      <div className="bg-[#f5f6fa] w-screen h-screen flex items-center justify-center">
+          <div className="bg-white rounded-lg p-8 w-80 gap-y-16 flex flex-col justify-between text-center shadow shadow-slate-700 focus:outline-none">
+              <h1 className="font-rubik text-3xl font-semibold text text-[#324152]">Username</h1>
+              <input className="font-rubik text-[#67727e] border-[#67727e2f] border-2 w-full h-12 rounded-lg bg-white p-2" placeholder="Enter your username..." onChange={(e) => {props.setUser(e.target.value)}} />
+              <button className="h-10 w-full rounded-lg bg-[#5457b6] font-rubik text-xl font-semibold flex items-center justify-center hover:cursor-pointer hover:opacity-50" onClick={() => {props.setForm(false)}}>Comment</button>
+          </div>
+      </div>
   )
 }
 

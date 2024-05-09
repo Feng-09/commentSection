@@ -577,6 +577,10 @@ html {
   bottom: 3rem;
 }
 
+.bottom-\[0\.4rem\] {
+  bottom: 0.4rem;
+}
+
 .left-0 {
   left: 0px;
 }
@@ -593,10 +597,6 @@ html {
   top: 50%;
 }
 
-.top-\[0\.4rem\] {
-  top: 0.4rem;
-}
-
 .z-40 {
   z-index: 40;
 }
@@ -609,10 +609,6 @@ html {
   float: right;
 }
 
-.clear-right {
-  clear: right;
-}
-
 .my-auto {
   margin-top: auto;
   margin-bottom: auto;
@@ -620,10 +616,6 @@ html {
 
 .mb-4 {
   margin-bottom: 1rem;
-}
-
-.mb-40 {
-  margin-bottom: 10rem;
 }
 
 .mb-6 {
@@ -656,10 +648,6 @@ html {
 
 .flex {
   display: flex;
-}
-
-.grid {
-  display: grid;
 }
 
 .h-1 {
@@ -719,12 +707,16 @@ html {
   width: 1rem;
 }
 
+.w-40 {
+  width: 10rem;
+}
+
 .w-80 {
   width: 20rem;
 }
 
-.w-\[0\.1rem\] {
-  width: 0.1rem;
+.w-\[0\.2rem\] {
+  width: 0.2rem;
 }
 
 .w-fit {
@@ -740,44 +732,12 @@ html {
   width: 100vw;
 }
 
-.w-\[0\.2rem\] {
-  width: 0.2rem;
-}
-
 .min-w-64 {
   min-width: 16rem;
 }
 
-.max-w-sm {
-  max-width: 24rem;
-}
-
-.max-w-md {
-  max-width: 28rem;
-}
-
 .max-w-3xl {
   max-width: 48rem;
-}
-
-.basis-\[\] {
-  flex-basis: ;
-}
-
-.basis-\[0\.1rem\] {
-  flex-basis: 0.1rem;
-}
-
-.basis-\[95\] {
-  flex-basis: 95;
-}
-
-.basis-\[95\%\] {
-  flex-basis: 95%;
-}
-
-.basis-\[100\%\] {
-  flex-basis: 100%;
 }
 
 .-translate-x-1\/2 {
@@ -790,28 +750,16 @@ html {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
-.auto-cols-max {
-  grid-auto-columns: max-content;
-}
-
-.auto-cols-auto {
-  grid-auto-columns: auto;
-}
-
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .flex-col {
   flex-direction: column;
 }
 
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
 .items-center {
   align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
 }
 
 .justify-between {
@@ -823,20 +771,16 @@ html {
        column-gap: 1.5rem;
 }
 
+.gap-y-16 {
+  row-gap: 4rem;
+}
+
 .gap-y-8 {
   row-gap: 2rem;
 }
 
 .self-start {
   align-self: flex-start;
-}
-
-.self-end {
-  align-self: flex-end;
-}
-
-.justify-self-end {
-  justify-self: end;
 }
 
 .overflow-y-auto {
@@ -853,6 +797,10 @@ html {
 
 .rounded-xl {
   border-radius: 0.75rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
 }
 
 .rounded-t-lg {
@@ -919,6 +867,10 @@ html {
   padding: 0.25rem;
 }
 
+.p-2 {
+  padding: 0.5rem;
+}
+
 .p-4 {
   padding: 1rem;
 }
@@ -966,6 +918,11 @@ html {
 
 .font-rubik {
   font-family: "Rubik";
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
 }
 
 .text-\[1px\] {
@@ -1134,6 +1091,11 @@ button:focus-visible {
   opacity: 0.5;
 }
 
+.focus\:outline-none:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
 @media (min-width: 768px) {
   .md\:relative {
     position: relative;
@@ -1147,16 +1109,12 @@ button:focus-visible {
     right: 1.7px;
   }
 
-  .md\:top-0 {
-    top: 0px;
+  .md\:right-\[1px\] {
+    right: 1px;
   }
 
   .md\:top-\[1px\] {
     top: 1px;
-  }
-
-  .md\:right-\[1px\] {
-    right: 1px;
   }
 
   .md\:z-20 {

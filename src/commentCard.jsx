@@ -6,13 +6,8 @@ import minus from '/images/icon-minus.svg'
 import reply from '/images/icon-reply.svg'
 import del from '/images/icon-delete.svg'
 import edit from '/images/icon-edit.svg'
-import amy from '../images/avatars/image-amyrobson.png'
-import julius from '../images/avatars/image-juliusomo.png'
-import max from '../images/avatars/image-maxblagun.png'
-import ramse from '../images/avatars/image-ramsesmiron.png'
 
-
-function CommentCard({ comment, info, setChat, setComments, replyClick, setReplyTo, setRepliedTo, comments, setReplyingToId, users, addComment, entry, setEntry, setRender, setMainInp }) {
+function CommentCard({ comment, info, setChat, setComments, replyClick, setReplyTo, setRepliedTo, comments, setReplyingToId, users, addComment, entry, setEntry, setRender, setMainInp, user }) {
     const [edit, setEdit] = useState(false)
     const [replyComment, setReplyComment] = useState(false)
     const [parts, setParts] = useState(comment.content.split(' '))
@@ -62,7 +57,7 @@ function CommentCard({ comment, info, setChat, setComments, replyClick, setReply
             <div className="flex mb-4">
                 <img src={comment.user.image.webp} className="w-10 h-10 mr-4" />
                 <h1 className="text-xl text-[#324152] font-rubik font-semibold my-auto mr-4">{comment.user.username}</h1>
-                {info.currentUser.username == comment.user.username ?
+                {user == comment.user.username ?
                 (<div className="h-6 w-12 my-auto ml-[-0.5rem] mr-2 rounded-md bg-[#5457b6] font-rubik text-center leading-5">you</div>)
                 : null}
                 <p className="text-[#67727e] font-rubik my-auto">{createdAt || comment.createdAt}</p>
@@ -95,7 +90,7 @@ function CommentCard({ comment, info, setChat, setComments, replyClick, setReply
             </div>
             <div className="flex justify-between items-center">
                 <Likes inScore={comment.score} />
-                {info.currentUser.username == comment.user.username ? !edit ?
+                {user == comment.user.username ? !edit ?
                 (<DelEdit setChat={setChat} comment={comment} setComments={setComments} comments={comments} setRender={setRender} setEdit={setEdit} />)
                 : (<div className='rounded-lg bg-[#5457b6] text-lg font-semibold font-rubik text-center leading-10 w-24 h-10 md:z-20 md:self-start hover:cursor-pointer hover:opacity-50' onClick={() => {setEdit(false); update()}}>UPDATE</div>) 
                 : (
