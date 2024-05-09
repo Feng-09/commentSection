@@ -55,7 +55,7 @@ function CommentCard({ comment, info, setChat, setComments, replyClick, setReply
         <div className="w-full bg-white rounded-lg h-fit p-4 flex flex-col mb-4 md:flex-col-reverse md:p-6">
             <div className="md:ml-16 md:mt-[-6rem]">
             <div className="flex mb-4">
-                <img src={comment.user.image.webp} className="w-10 h-10 mr-4" />
+                <img src={comment.user.image.webp} className="w-10 h-10 rounded-full mr-4" />
                 <h1 className="text-xl text-[#324152] font-rubik font-semibold my-auto mr-4">{comment.user.username}</h1>
                 {user == comment.user.username ?
                 (<div className="h-6 w-12 my-auto ml-[-0.5rem] mr-2 rounded-md bg-[#5457b6] font-rubik text-center leading-5">you</div>)
