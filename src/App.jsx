@@ -3,7 +3,7 @@ import data from '/data.json'
 import CommentCard from './commentCard'
 import { MentionsInput, Mention } from 'react-mentions'
 import mentionStyle from './mentionStyle'
-import userPfp from '/images/user.jpg'
+import userPfp from '/images/avatars/user.jpg'
 
 function App() {
   const [chat, setChat] = useState(data)

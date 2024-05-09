@@ -597,6 +597,30 @@ html {
   top: 50%;
 }
 
+.top-\[0\.4rem\] {
+  top: 0.4rem;
+}
+
+.top-\[0\.2rem\] {
+  top: 0.2rem;
+}
+
+.top-\[0\.1rem\] {
+  top: 0.1rem;
+}
+
+.top-\[0\.07rem\] {
+  top: 0.07rem;
+}
+
+.top-\[0\.05rem\] {
+  top: 0.05rem;
+}
+
+.top-\[0\.0rem\] {
+  top: 0.0rem;
+}
+
 .z-40 {
   z-index: 40;
 }
@@ -1115,6 +1139,10 @@ button:focus-visible {
 
   .md\:top-\[1px\] {
     top: 1px;
+  }
+
+  .md\:top-0 {
+    top: 0px;
   }
 
   .md\:z-20 {
