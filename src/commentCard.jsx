@@ -140,8 +140,8 @@ function Likes({ inScore }) {
     return (
         <div className="bg-[#eaecf1] h-10 w-24 px-3 py-3 rounded-xl flex justify-between md:flex-col md:h-24 md:w-fit items-center">
             <img src={plus} className="w-4 h-4 hover:cursor-pointer" onClick={upVote} />
-            <h1 className="text-xl text-[#5457b6] font-rubik font-semibold leading-none relative bottom-1 md:bottom-0">{score}</h1>
-            <img src={minus} className="w-4 h-1 relative top-[0.4rem] md:top-0 hover:cursor-pointer" onClick={downVote} />
+            <h1 className="text-xl text-[#5457b6] font-rubik font-semibold leading-none">{score}</h1>
+            <img src={minus} className="w-4 h-1 relative bottom-[0.4rem] md:bottom-0 hover:cursor-pointer" onClick={downVote} />
         </div>
     )
 }
