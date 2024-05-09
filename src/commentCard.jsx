@@ -6,6 +6,10 @@ import minus from '/images/icon-minus.svg'
 import reply from '/images/icon-reply.svg'
 import del from '/images/icon-delete.svg'
 import edit from '/images/icon-edit.svg'
+import amy from '../images/avatars/image-amyrobson.png'
+import julius from '../images/avatars/image-juliusomo.png'
+import max from '../images/avatars/image-maxblagun.png'
+import ramse from '../images/avatars/image-ramsesmiron.png'
 
 
 function CommentCard({ comment, info, setChat, setComments, replyClick, setReplyTo, setRepliedTo, comments, setReplyingToId, users, addComment, entry, setEntry, setRender, setMainInp }) {
@@ -48,6 +52,8 @@ function CommentCard({ comment, info, setChat, setComments, replyClick, setReply
       createdAt = Math.floor(commentAge/86400) + "days ago"
     }
     }
+
+    console.log(comment.user.image.webp)
 
     return (
         <>
