@@ -6,8 +6,9 @@ import minus from '/images/icon-minus.svg'
 import reply from '/images/icon-reply.svg'
 import del from '/images/icon-delete.svg'
 import edit from '/images/icon-edit.svg'
+import userPfp from '/images/avatars/user.jpg'
 
-function CommentCard({ comment, info, setChat, setComments, replyClick, setReplyTo, setRepliedTo, comments, setReplyingToId, users, addComment, entry, setEntry, setRender, setMainInp, user }) {
+function CommentCard({ comment, setChat, setComments, replyClick, setReplyTo, setRepliedTo, comments, setReplyingToId, users, addComment, entry, setEntry, setRender, setMainInp, user }) {
     const [edit, setEdit] = useState(false)
     const [replyComment, setReplyComment] = useState(false)
     const [parts, setParts] = useState(comment.content.split(' '))
@@ -39,16 +40,14 @@ function CommentCard({ comment, info, setChat, setComments, replyClick, setReply
     if (comment.createdTime) {
     commentAge = (currTime - comment.createdTime)/1000
     createdAt = Math.floor(commentAge) + "s ago"
-    if (commentAge > 59) {
-      createdAt = Math.floor(commentAge/60) + "mins ago"
-    } else if (commentAge/60 > 59) {
-      createdAt = Math.floor(commentAge/3600) + "hours ago"
+    if (commentAge > 59 && commentAge/60 <= 59) {
+      createdAt = Math.floor(commentAge/60) + (Math.floor(commentAge/60) == 1 ? " min ago" : " mins ago")
+    } else if (commentAge/60 > 59 && commentAge/3600 <= 24) {
+      createdAt = Math.floor(commentAge/3600) + (Math.floor(commentAge/3600) == 1 ? " hour ago" : " hours ago")
     } else if (commentAge/3600 > 24) {
-      createdAt = Math.floor(commentAge/86400) + "days ago"
+      createdAt = Math.floor(commentAge/86400) + (Math.floor(commentAge/86400) == 1 ? " day ago" : " days ago")
     }
     }
-
-    console.log(comment.user.image.webp)
 
     return (
         <>
@@ -91,8 +90,8 @@ function CommentCard({ comment, info, setChat, setComments, replyClick, setReply
             <div className="flex justify-between items-center">
                 <Likes inScore={comment.score} />
                 {user == comment.user.username ? !edit ?
-                (<DelEdit setChat={setChat} comment={comment} setComments={setComments} comments={comments} setRender={setRender} setEdit={setEdit} />)
-                : (<div className='rounded-lg bg-[#5457b6] text-lg font-semibold font-rubik text-center leading-10 w-24 h-10 md:z-20 md:self-start hover:cursor-pointer hover:opacity-50' onClick={() => {setEdit(false); update()}}>UPDATE</div>) 
+                (<DelEdit setChat={setChat} comment={comment} setComments={setComments} comments={comments} setRender={setRender} setEdit={setEdit} setPostId={setPostId} />)
+                : (<div className='rounded-lg bg-[#5457b6] text-lg font-semibold font-rubik text-center leading-10 w-24 h-10 md:z-20 md:self-start hover:cursor-pointer hover:opacity-50' onClick={() => {setEdit(false); update(); setRender(a => !a)}}>UPDATE</div>) 
                 : (
                 <div className="flex md:self-start md:z-20 hover:cursor-pointer hover:opacity-50">
                   <img src={reply} className="w-4 h-4 mr-2" />
@@ -103,7 +102,7 @@ function CommentCard({ comment, info, setChat, setComments, replyClick, setReply
         </div>
         {replyComment && window.screen.width >= 768 ? (
             <div className="flex gap-x-6 bg-white rounded-lg p-6 mb-4 mt-[-0.5rem] pb-2">
-                <img src={info.currentUser.image.png} className="w-12 h-12" />
+                <img src={userPfp} className="w-12 h-12 rounded-full" />
                 <MentionsInput
                 style={mentionStyle}
                 value={entry}
@@ -112,9 +111,13 @@ function CommentCard({ comment, info, setChat, setComments, replyClick, setReply
                 className='bg-white border-[#67727e2f] border-2 font-rubik h-fit w-full rounded-lg text-[#67727e] mb-6 overflow-y-auto'>
                  <Mention data={users} trigger="@" markup="@[__display__]" appendSpaceOnAdd={true} className='text-[#5457b6] z-50  md:relative md:top-[1px] md:right-[1.7px]' />
                </MentionsInput>
-               <div className='h-12 w-24 rounded-lg bg-[#5457b6] float-right self-start hover:cursor-pointer hover:opacity-50'>
+               <div className="flex flex-col items-center">
+                <div className='h-12 w-24 rounded-lg bg-[#5457b6] float-right self-start mb-2 hover:cursor-pointer hover:opacity-50'>
                  <h1 className='my-auto relative bottom-1 p-4 text-lg font-semibold font-rubik text-center' onClick={() => {addComment(); setReplyComment(false); setMainInp(true)}}>REPLY</h1>
+                </div>
+                <div className="font-rubik font-bold text-lg text-[#ed6468] text-center w-8 h-8 border-2 border-[#ed6468] rounded-xl opacity-50 hover:cursor-pointer" onClick={() => {setReplyComment(false)}}>X</div>
                </div>
+               
             </div>
         ) : null}
         </>
@@ -157,7 +160,6 @@ function DelEdit({ comment, setComments, comments, setRender, setEdit }) {
           setComments(newArr)
         } else {
             const newArr = comments
-            console.log(comment.replyingToId)
             newArr[comment.replyingToId - 1].replies = newArr[comment.replyingToId - 1].replies.filter((item) => {
                 return (item.id != comment.id)
             })
@@ -177,7 +179,7 @@ function DelEdit({ comment, setComments, comments, setRender, setEdit }) {
             </div>
             {confirm ? 
             (<>
-             <div className="fixed top-0 left-0 w-screen h-screen z-40 bg-black opacity-40"></div>
+             <div className="fixed top-0 left-0 w-screen h-screen z-50 bg-black opacity-40"></div>
              <div className='bg-white rounded-lg p-8 flex flex-col gap-y-8 border-4 border-[#ed646996] shadow shadow-slate-700 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-64 w-80 z-50'>
                <p className='text-[#67727e] font-rubik text-xl font-bold'>Delete this comment?</p>
                <p className="text-[#67727e] font-rubik text-sm">Are you sure you want to delete this comment? This will remove the comment and can't be undone.</p>

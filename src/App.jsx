@@ -4,6 +4,8 @@ import CommentCard from './commentCard'
 import { MentionsInput, Mention } from 'react-mentions'
 import mentionStyle from './mentionStyle'
 import userPfp from '/images/avatars/user.jpg'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 function App() {
   const [chat, setChat] = useState(data)
@@ -12,25 +14,30 @@ function App() {
   const [replyTo, setReplyTo] = useState('')
   const [repliedTo, setRepliedTo] = useState('')
   const [id, setId] = useState(5)
-  const [postId, setPostId] = useState(3)
+  const [postId, setPostId] = useState(comments.length + 1)
   const [render, setRender] = useState(false)
   const [replyingToId, setReplyingToId] = useState(null)
   const [mainInp, setMainInp] = useState(true)
   const [user, setUser] = useState('')
   const [form, setForm] = useState(true)
   const inpRef = useRef(null)
-  let info = data
+  const nameCont = useRef()
+
+  const { contextSafe } = useGSAP()
+
+  const acceptUser = contextSafe(() => {
+    const tl = gsap.timeline()
+    tl.to('.userInp', { y: 120, opacity: 0, duration: 1, ease: 'back.inOut(5)'})
+    tl.to('.nameCont', { y: -1000, duration: 1, ease: 'power3.inOut(10)', stagger: {
+      each: 0.1,
+      ease: 'power1.inOut'
+    }}, 0.6)
+  })
 
   //store the comments in localStorage
   useEffect(() => {
     localStorage.setItem("comments", JSON.stringify(comments))
-  }, [comments])
-
-  // setTimeout(localStorage.clear(), 604800000) //clear the localStorage after a week
-
-  //This is to tell how long ago a comment was posted
-  const curr = new Date()
-  const currTime = curr.getTime()
+  }, [comments, render])
 
   const users = [
     {
@@ -55,7 +62,6 @@ function App() {
     }
   ]
 
-  console.log(user)
   const replyClick = () => {
     //this is for focusing on the text area on clicking 'reply"
     if (window.screen.width < 768) {
@@ -86,7 +92,6 @@ function App() {
         "score": 0,
         "user": {
           "image": {
-            "png": "./images/avatars/image-juliusomo.png",
             "webp": "./images/avatars/user.jpg"
           },
           "username": user
@@ -105,7 +110,6 @@ function App() {
         "score": 0,
         "user": {
           "image": {
-            "png": "./images/avatars/image-juliusomo.png",
             "webp": "./images/avatars/user.jpg"
           },
           "username": user
@@ -117,6 +121,7 @@ function App() {
       setComments(newArr)
       setRepliedTo('')
       setReplyTo('')
+      setRender(a => !a)
     }
     setEntry('')
     setId(a => a + 1)
@@ -124,18 +129,18 @@ function App() {
 
   return (
     <>
-    {form ? (<Form setForm={setForm} setUser={setUser} />) : (
+    <Form setForm={setForm} setUser={setUser} nameCont={nameCont} acceptUser={acceptUser} />
     <div className='min-h-screen h-fit min-w-screen w-full px-6 py-8 bg-[#f5f6fa] flex flex-col items-center'>
       {comments.sort((a, b) => b - a).map((comment, id) => {
         return (
           <div className='w-full max-w-3xl'>
-          <CommentCard comment={comment} info={info} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} user={user} />
+          <CommentCard comment={comment} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} user={user} />
           {comment.replies.map((reply, id) => {
             return (
               <div className='flex h-fit'>
                 <div className='w-[0.2rem] mr-[0.9rem] bg-[#67727e2f] text-[1px]'>.</div>
                 <div className='flex flex-col w-full'>
-                  <CommentCard comment={reply} info={info} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} user={user} setRender={setRender} />
+                  <CommentCard comment={reply} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} user={user} setRender={setRender} />
                 </div>
               </div>
             )
@@ -162,20 +167,24 @@ function App() {
           <h1 className='my-auto leading-[3rem] text-lg font-semibold font-rubik text-center' onClick={addComment}>SEND</h1>
         </div>
       </div>
-    </div>)}
+    </div>
     </>
   )
 }
 
 function Form(props) {
   return (
-      <div className="bg-[#f5f6fa] w-screen h-screen flex items-center justify-center">
-          <div className="bg-white rounded-lg p-8 w-80 gap-y-16 flex flex-col justify-between text-center shadow shadow-slate-700 focus:outline-none">
+    <>
+      <div className="bg-[#f5f6fa] w-screen h-screen flex items-center justify-center fixed top-0 z-50 nameCont" ref={props.nameCont}>
+          <div className="bg-white rounded-lg p-8 w-80 gap-y-16 flex flex-col justify-between text-center shadow shadow-slate-700 focus:outline-none userInp">
               <h1 className="font-rubik text-3xl font-semibold text text-[#324152]">Username</h1>
               <input className="font-rubik text-[#67727e] border-[#67727e2f] border-2 w-full h-12 rounded-lg bg-white p-2" placeholder="Enter your username..." onChange={(e) => {props.setUser(e.target.value)}} />
-              <button className="h-10 w-full rounded-lg bg-[#5457b6] font-rubik text-xl font-semibold flex items-center justify-center hover:cursor-pointer hover:opacity-50" onClick={() => {props.setForm(false)}}>Comment</button>
+              <button className="h-10 w-full rounded-lg bg-[#5457b6] font-rubik text-xl font-semibold flex items-center justify-center hover:cursor-pointer hover:opacity-50" onClick={() => {props.acceptUser()}}>Comment</button>
           </div>
       </div>
+      <div className="bg-[#afb9df] w-screen h-screen fixed top-0 z-40 nameCont"></div>
+      <div className="bg-[#7283c9] w-screen h-screen fixed top-0 z-30 nameCont"></div>
+    </>
   )
 }
 

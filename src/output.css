@@ -561,6 +561,40 @@ html {
   --tw-backdrop-sepia:  ;
 }
 
+.container {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
 .fixed {
   position: fixed;
 }
@@ -575,10 +609,6 @@ html {
 
 .bottom-12 {
   bottom: 3rem;
-}
-
-.bottom-\[0\.4rem\] {
-  bottom: 0.4rem;
 }
 
 .left-0 {
@@ -597,28 +627,12 @@ html {
   top: 50%;
 }
 
-.top-\[0\.4rem\] {
-  top: 0.4rem;
-}
-
-.top-\[0\.2rem\] {
-  top: 0.2rem;
-}
-
-.top-\[0\.1rem\] {
-  top: 0.1rem;
-}
-
-.top-\[0\.07rem\] {
-  top: 0.07rem;
-}
-
 .top-\[0\.05rem\] {
   top: 0.05rem;
 }
 
-.top-\[0\.0rem\] {
-  top: 0.0rem;
+.z-30 {
+  z-index: 30;
 }
 
 .z-40 {
@@ -636,6 +650,10 @@ html {
 .my-auto {
   margin-top: auto;
   margin-bottom: auto;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
 }
 
 .mb-4 {
@@ -698,6 +716,10 @@ html {
   height: 1.5rem;
 }
 
+.h-8 {
+  height: 2rem;
+}
+
 .h-fit {
   height: -moz-fit-content;
   height: fit-content;
@@ -731,8 +753,8 @@ html {
   width: 1rem;
 }
 
-.w-40 {
-  width: 10rem;
+.w-8 {
+  width: 2rem;
 }
 
 .w-80 {
@@ -811,6 +833,10 @@ html {
   overflow-y: auto;
 }
 
+.rounded-full {
+  border-radius: 9999px;
+}
+
 .rounded-lg {
   border-radius: 0.5rem;
 }
@@ -821,10 +847,6 @@ html {
 
 .rounded-xl {
   border-radius: 0.75rem;
-}
-
-.rounded-full {
-  border-radius: 9999px;
 }
 
 .rounded-t-lg {
@@ -844,6 +866,11 @@ html {
   border-color: #67727e2f;
 }
 
+.border-\[\#ed6468\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(237 100 104 / var(--tw-border-opacity));
+}
+
 .border-\[\#ed646996\] {
   border-color: #ed646996;
 }
@@ -855,6 +882,16 @@ html {
 
 .bg-\[\#67727e2f\] {
   background-color: #67727e2f;
+}
+
+.bg-\[\#7283c9\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(114 131 201 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#afb9df\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(175 185 223 / var(--tw-bg-opacity));
 }
 
 .bg-\[\#eaecf1\] {
@@ -1020,6 +1057,10 @@ html {
   opacity: 0.4;
 }
 
+.opacity-50 {
+  opacity: 0.5;
+}
+
 .shadow {
   --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
@@ -1125,10 +1166,6 @@ button:focus-visible {
     position: relative;
   }
 
-  .md\:bottom-0 {
-    bottom: 0px;
-  }
-
   .md\:right-\[1\.7px\] {
     right: 1.7px;
   }
@@ -1137,12 +1174,12 @@ button:focus-visible {
     right: 1px;
   }
 
-  .md\:top-\[1px\] {
-    top: 1px;
-  }
-
   .md\:top-0 {
     top: 0px;
+  }
+
+  .md\:top-\[1px\] {
+    top: 1px;
   }
 
   .md\:z-20 {
