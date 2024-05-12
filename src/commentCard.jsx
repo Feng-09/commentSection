@@ -90,7 +90,7 @@ function CommentCard({ comment, setChat, setComments, replyClick, setReplyTo, se
             <div className="flex justify-between items-center">
                 <Likes inScore={comment.score} />
                 {user == comment.user.username ? !edit ?
-                (<DelEdit setChat={setChat} comment={comment} setComments={setComments} comments={comments} setRender={setRender} setEdit={setEdit} setPostId={setPostId} />)
+                (<DelEdit setChat={setChat} comment={comment} setComments={setComments} comments={comments} setRender={setRender} setEdit={setEdit} />)
                 : (<div className='rounded-lg bg-[#5457b6] text-lg font-semibold font-rubik text-center leading-10 w-24 h-10 md:z-20 md:self-start hover:cursor-pointer hover:opacity-50' onClick={() => {setEdit(false); update(); setRender(a => !a)}}>UPDATE</div>) 
                 : (
                 <div className="flex md:self-start md:z-20 hover:cursor-pointer hover:opacity-50">

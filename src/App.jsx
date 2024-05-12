@@ -25,6 +25,7 @@ function App() {
 
   const { contextSafe } = useGSAP()
 
+  //page transition animation
   const acceptUser = contextSafe(() => {
     const tl = gsap.timeline()
     tl.to('.userInp', { y: 120, opacity: 0, duration: 1, ease: 'back.inOut(5)'})
