@@ -1,8 +1,22 @@
-# React + Vite
+# Interactive Comments Section
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## About
 
-Currently, two official plugins are available:
+This is a functional CRUD app that lets you Create, Read, Update and Delete comments. I added a mentions feature that lets you tag other users to your comment. I also added a cool page transition animation. Please enjoy.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technologies used
+
+React Tailwind, GSAP
+
+### Screenshot
+
+![Screenshot.png](Screenshot.png)
+
+### Links
+
+- Live Site URL: [https://feng-comments.netlify.app](https://feng-comments.netlify.app)
+
+### Built with
+ 
+- Vite
+- Mobile-first workflow
