@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { MentionsInput, Mention } from 'react-mentions'
 import mentionStyle from './mentionStyle'
 import plus from '/images/icon-plus.svg'
@@ -7,8 +7,9 @@ import reply from '/images/icon-reply.svg'
 import del from '/images/icon-delete.svg'
 import edit from '/images/icon-edit.svg'
 import userPfp from '/images/avatars/user.jpg'
+import { UserContext } from './UserContext'
 
-function CommentCard({ comment, setChat, setComments, replyClick, setReplyTo, setRepliedTo, comments, setReplyingToId, users, addComment, entry, setEntry, setRender, setMainInp, user }) {
+function CommentCard({ comment, setComments, replyClick, setReplyTo, setRepliedTo, comments, setReplyingToId, users, addComment, entry, setEntry, setRender, setMainInp, ws }) {
     const [edit, setEdit] = useState(false)
     const [replyComment, setReplyComment] = useState(false)
     const [parts, setParts] = useState(comment.content.split(' '))
@@ -30,6 +31,14 @@ function CommentCard({ comment, setChat, setComments, replyClick, setReplyTo, se
       }
     const update = () => {
         setParts(content.replace(/@\[/g, "").replace(/]/g, "").replace(/@\w+/g, (replaceWithLink)).split(' '))
+
+        ws.send(JSON.stringify({
+            content:content.replace(/@\[/g, "").replace(/]/g, "").replace(/@\w+/g, (replaceWithLink)),
+            id:comment.id,
+            postId:comment.postId,
+            replyingToId:comment.replyingToId,
+            updated: true
+        }))
     }
 
     //to get the time since comment was posted
@@ -44,10 +53,18 @@ function CommentCard({ comment, setChat, setComments, replyClick, setReplyTo, se
       createdAt = Math.floor(commentAge/60) + (Math.floor(commentAge/60) == 1 ? " min ago" : " mins ago")
     } else if (commentAge/60 > 59 && commentAge/3600 <= 24) {
       createdAt = Math.floor(commentAge/3600) + (Math.floor(commentAge/3600) == 1 ? " hour ago" : " hours ago")
-    } else if (commentAge/3600 > 24) {
+    } else if (commentAge/3600 > 24 && commentAge/86400 <= 7) {
       createdAt = Math.floor(commentAge/86400) + (Math.floor(commentAge/86400) == 1 ? " day ago" : " days ago")
+    } else if (commentAge/86400 > 7 && commentAge/86400 <= 31) {
+      createdAt = Math.floor(commentAge/604800) + (Math.floor(commentAge/604800) == 1 ? " week ago" : " weeks ago")
+    } else if (commentAge/86400 > 31 && commentAge/86400 <= 365.25) {
+        createdAt = Math.floor(commentAge/2678400) + (Math.floor(commentAge/2678400) == 1 ? " month ago" : " months ago")
+    } else if (commentAge/86400 > 365.25) {
+        createdAt = Math.floor(commentAge/31557600) + (Math.floor(commentAge/31557600) == 1 ? " year ago" : " years ago")
     }
     }
+
+    const {username} = useContext(UserContext)
 
     return (
         <>
@@ -56,7 +73,7 @@ function CommentCard({ comment, setChat, setComments, replyClick, setReplyTo, se
             <div className="flex mb-4">
                 <img src={comment.user.image.webp} className="w-10 h-10 rounded-full mr-4" />
                 <h1 className="text-xl text-[#324152] font-rubik font-semibold my-auto mr-4">{comment.user.username}</h1>
-                {user == comment.user.username ?
+                {username == comment.user.username ?
                 (<div className="h-6 w-12 my-auto ml-[-0.5rem] mr-2 rounded-md bg-[#5457b6] font-rubik text-center leading-5">you</div>)
                 : null}
                 <p className="text-[#67727e] font-rubik my-auto">{createdAt || comment.createdAt}</p>
@@ -88,14 +105,14 @@ function CommentCard({ comment, setChat, setComments, replyClick, setReplyTo, se
                </MentionsInput>)}
             </div>
             <div className="flex justify-between items-center">
-                <Likes inScore={comment.score} />
-                {user == comment.user.username ? !edit ?
-                (<DelEdit setChat={setChat} comment={comment} setComments={setComments} comments={comments} setRender={setRender} setEdit={setEdit} />)
+                <Likes inScore={comment.score} ws={ws} id={comment.id} repToId={comment.replyingToId} />
+                {username == comment.user.username ? !edit ?
+                (<DelEdit comment={comment} setComments={setComments} comments={comments} setRender={setRender} setEdit={setEdit} ws={ws} />)
                 : (<div className='rounded-lg bg-[#5457b6] text-lg font-semibold font-rubik text-center leading-10 w-24 h-10 md:z-20 md:self-start hover:cursor-pointer hover:opacity-50' onClick={() => {setEdit(false); update(); setRender(a => !a)}}>UPDATE</div>) 
                 : (
-                <div className="flex md:self-start md:z-20 hover:cursor-pointer hover:opacity-50">
+                <div className="flex md:self-start md:z-20 hover:cursor-pointer hover:opacity-50" onClick={() => {replyClick(); setReplyTo(comment.user.username); setRepliedTo(comment.user.username); setReplyingToId(comment.postId || comment.replyingToId); setReplyComment(true); window.screen.width >= 768 ? setMainInp(false) : null}}>
                   <img src={reply} className="w-4 h-4 mr-2" />
-                  <h1 className="text-[#5457b6] font-rubik font-semibold text-xl leading-4" onClick={() => {replyClick(); setReplyTo(comment.user.username); setRepliedTo(comment.user.username); setReplyingToId(comment.postId || comment.replyingToId); setReplyComment(true); window.screen.width >= 768 ? setMainInp(false) : null}}>Reply</h1>
+                  <h1 className="text-[#5457b6] font-rubik font-semibold text-xl leading-4">Reply</h1>
                 </div>
                 )}
             </div>
@@ -113,7 +130,7 @@ function CommentCard({ comment, setChat, setComments, replyClick, setReplyTo, se
                </MentionsInput>
                <div className="flex flex-col items-center">
                 <div className='h-12 w-24 rounded-lg bg-[#5457b6] float-right self-start mb-2 hover:cursor-pointer hover:opacity-50'>
-                 <h1 className='my-auto relative bottom-1 p-4 text-lg font-semibold font-rubik text-center' onClick={() => {addComment(); setReplyComment(false); setMainInp(true)}}>REPLY</h1>
+                 <h1 className='my-auto relative bottom-1 p-4 text-lg font-semibold font-rubik text-center' onClick={() => {addComment(event); setReplyComment(false); setMainInp(true)}}>REPLY</h1>
                 </div>
                 <div className="font-rubik font-bold text-lg text-[#ed6468] text-center w-8 h-8 border-2 border-[#ed6468] rounded-xl opacity-50 hover:cursor-pointer" onClick={() => {setReplyComment(false)}}>X</div>
                </div>
@@ -124,7 +141,7 @@ function CommentCard({ comment, setChat, setComments, replyClick, setReplyTo, se
     )
 }
 
-function Likes({ inScore }) {
+function Likes({ inScore, ws, id, repToId }) {
     const home = inScore
     const [score, setScore] = useState(inScore)
 
@@ -133,12 +150,22 @@ function Likes({ inScore }) {
         if (score <= home) {
             setScore(score + 1)
         }
+        ws.send(JSON.stringify({
+            score: score + 1,
+            id: id,
+            replyingToId: repToId
+        }))
     }
     const downVote = () => {
         //this makes it so that you can't add more than one downvote
         if (score >= home) {
             setScore(score - 1)
         }
+        ws.send(JSON.stringify({
+            score: score - 1,
+            id: id,
+            replyingToId: repToId
+        }))
     }
 
     return (
@@ -150,21 +177,33 @@ function Likes({ inScore }) {
     )
 }
 
-function DelEdit({ comment, setComments, comments, setRender, setEdit }) {
+function DelEdit({ comment, setComments, comments, setRender, setEdit, ws }) {
     const [confirm, setConfirm] = useState(false)
     const delComment = () => {
         if (comment.postId) {
-          const newArr = comments.filter((item) => {
-           return (item.id != comment.id)
-          })
-          setComments(newArr)
+        //   const newArr = comments.filter((item) => {
+        //    return (item.id != comment.id)
+        //   })
+        //   setComments(newArr)
+
+          ws.send(JSON.stringify({
+            deleted:true,
+            id:comment.id,
+            postId:comment.postId
+          }))
         } else {
-            const newArr = comments
-            newArr[comment.replyingToId - 1].replies = newArr[comment.replyingToId - 1].replies.filter((item) => {
-                return (item.id != comment.id)
-            })
-            setComments(newArr)
-            setRender(a => !a)
+            // const newArr = comments
+            // newArr[comment.replyingToId - 1].replies = newArr[comment.replyingToId - 1].replies.filter((item) => {
+            //     return (item.id != comment.id)
+            // })
+            // setComments(newArr)
+            // setRender(a => !a)
+
+            ws.send(JSON.stringify({
+                deleted: true,
+                id:comment.id,
+                replyingToId:comment.replyingToId
+              }))
         }
     }
     return (

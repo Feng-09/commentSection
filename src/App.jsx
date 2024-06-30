@@ -1,44 +1,159 @@
-import { useState, useRef, useEffect } from 'react'
-import data from '/data.json'
+import { useState, useRef, useEffect, useContext } from 'react'
 import CommentCard from './commentCard'
+import Form from './AuthForm'
 import { MentionsInput, Mention } from 'react-mentions'
 import mentionStyle from './mentionStyle'
 import userPfp from '/images/avatars/user.jpg'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
+import axios from 'axios'
+import { UserContext } from './UserContext'
 
 function App() {
-  const [chat, setChat] = useState(data)
-  const [comments, setComments] = useState(JSON.parse(localStorage.getItem("comments")) || chat.comments)
+  axios.defaults.baseURL = 'http://localhost:3000'
+  axios.defaults.withCredentials = true
+  const [comments, setComments] = useState(null)
   const [entry, setEntry] = useState('')
   const [replyTo, setReplyTo] = useState('')
   const [repliedTo, setRepliedTo] = useState('')
-  const [id, setId] = useState(5)
-  const [postId, setPostId] = useState(comments.length + 1)
+  const [id, setId] = useState(null)
+  const [postId, setPostId] = useState(comments?.length + 1)
   const [render, setRender] = useState(false)
-  const [replyingToId, setReplyingToId] = useState(null)
+  const [replyingToId, setReplyingToId] = useState(100)
   const [mainInp, setMainInp] = useState(true)
-  const [user, setUser] = useState('')
-  const [form, setForm] = useState(true)
+  const [ws, setWs] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const inpRef = useRef(null)
   const nameCont = useRef()
 
   const { contextSafe } = useGSAP()
+  const {username} = useContext(UserContext)
 
   //page transition animation
   const acceptUser = contextSafe(() => {
-    const tl = gsap.timeline()
-    tl.to('.userInp', { y: 120, opacity: 0, duration: 1, ease: 'back.inOut(5)'})
-    tl.to('.nameCont', { y: -1000, duration: 1, ease: 'power3.inOut(10)', stagger: {
-      each: 0.1,
-      ease: 'power1.inOut'
-    }}, 0.6)
+      const tl = gsap.timeline()
+      tl.to('.userInp', { y: 120, opacity: 0, duration: 1, ease: 'back.inOut(5)'})
+      tl.to('.nameCont', { y: -1000, duration: 1, ease: 'power3.inOut(10)', stagger: {
+        each: 0.1,
+        ease: 'power1.inOut'
+      }}, 0.6)
+      setTimeout(() => {
+        if (username) {
+          setIsLoggedIn(true)
+        }
+      }, 1000)
   })
 
-  //store the comments in localStorage
+  //retrieve comments from the database
   useEffect(() => {
-    localStorage.setItem("comments", JSON.stringify(comments))
-  }, [comments, render])
+    axios.get('/comments').then(response => {
+      if (!comments) {
+        setComments(response.data)
+      }      
+      setPostId(comments.length + 1)
+    })
+  }, [comments])
+
+  //retrieve next id from the server
+  useEffect(() => {
+    axios.get('/id').then(response => {
+      if (!id) {
+        setId(response.data)
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:3000')
+    setWs(ws)
+    ws.addEventListener('message', handleMessage)
+  }, [])
+
+  const handleMessage = (event) => {
+    const messageData = JSON.parse(event.data)
+    console.log(messageData.score)
+    if (messageData.newId) {
+      setId(messageData.newId)
+    }
+    if (messageData.replies && !messageData.replyingToId) {
+      setComments((prevComments) => [
+        ...prevComments, {
+          "id": messageData.id,
+          "postId": messageData.postId,
+          "content": messageData.content,
+          "createdTime": messageData.createdTime,
+          "score": messageData.score,
+          "user": messageData.user,
+          "replies": messageData.replies,
+          "replyingTo": messageData.repliedTo
+        }
+      ])
+    } else if (messageData.replies && messageData.replyingToId) {
+      setComments((prevComments) => {
+        const newArr = prevComments
+        const newReplies = newArr[messageData.replyingToId - 1].replies
+        newArr[messageData.replyingToId - 1].replies = [...newReplies, {
+          "id": messageData.id,
+          "content": messageData.content,
+          "createdTime": messageData.createdTime,
+          "score": messageData.score,
+          "user": messageData.user,
+          "replies": [],
+          "replyingTo": messageData.repliedTo,
+          "replyingToId": messageData.replyingToId
+        }];
+        return newArr;
+      });
+      setRender(a => !a)
+    } else if (messageData.deleted && messageData.postId) {
+      setComments((prevComments) => {
+        prevComments.filter((item) => {
+          return item.id != messageData.id
+        })
+      })
+    } else if (messageData.deleted && messageData.replyingToId) {
+      setComments((prevComments) => {
+        prevComments[messageData.replyingToId - 1].replies.filter((item) => {
+          return item.id != messageData.id
+        })
+      });
+      setRender(a => !a)
+    } else if (messageData.updated && messageData.postId) {
+      setComments((prevComments) => {
+        prevComments.forEach((item) => {
+          if (item.id == messageData.id) {
+            item.content = messageData.content
+          }
+        })
+      })
+    } else if (messageData.updated && messageData.replyingToId) {
+      setComments((prevComments) => {
+        prevComments[messageData.replyingToId - 1].replies.forEach((item) => {
+          if (item.id == messageData.id) {
+            item.content = messageData.content
+          }
+        })
+      })
+    } else if (messageData.score && !messageData.replyingToId) {
+      console.log('ji')
+      setComments((prevComments) => {
+        prevComments.forEach((item) => {
+          if (item.id == messageData.id) {
+            item.score = messageData.score
+          }
+        })
+      })
+    } else if (messageData.score && messageData.replyingToId) {
+      console.log('jiji')
+      setComments((prevComments) => {
+        prevComments[messageData.replyingToId - 1].replies.forEach((item) => {
+          if (item.id == messageData.id) {
+            item.score = messageData.score
+          }
+        })
+      })
+    }
+  }
 
   const users = [
     {
@@ -70,7 +185,7 @@ function App() {
     }    
   }
 
-  const addComment = () => {
+  const addComment = (event) => {
     //to create a link for mentions
     const replaceWithLink = (link) => {
       const profile = link.slice(1)
@@ -83,65 +198,68 @@ function App() {
     const p = new Date()
     const postTime = p.getTime()
 
+    // using websocketserver to update comments realtime
+    event.preventDefault()
+    if (!repliedTo) {//for sending first-level comments
+      ws.send(JSON.stringify({
+        content: entry.replace(/@\[/g, "").replace(/]/g, "").replace(/@\w+/g, (replaceWithLink)),
+        id: id,
+        newId: id + 1,
+        postId: postId,
+        // "content: entry.replace(/@\[/g, "").replace(/]/g, "").replace(/@\w+/g, (replaceWithLink)),
+        createdTime: postTime,
+        score: 0,
+        user: {
+          image: {
+            webp: "./images/avatars/user.jpg"
+          },
+          username: username
+        },
+        replies: [],
+      }))
+    } else {
+      ws.send(JSON.stringify({//for sending replies
+        content: entry.replace(/@\[/g, "").replace(/]/g, "").replace(/@\w+/g, (replaceWithLink)),
+        id: id,
+        newId: id + 1,
+        createdTime: postTime,
+        score: 0,
+        user: {
+          image: {
+            webp: "./images/avatars/user.jpg"
+          },
+          username: username
+        },
+        replies: [],
+        replyingTo: repliedTo,
+        replyingToId: replyingToId
+      }))
+    }
+
     if (!repliedTo) {//for adding first-level comments
-      setComments((prevComments) => 
-      [...prevComments, {
-        "id": id,
-        "postId": postId,
-        "content": entry.replace(/@\[/g, "").replace(/]/g, "").replace(/@\w+/g, (replaceWithLink)),
-        "createdTime": postTime,
-        "score": 0,
-        "user": {
-          "image": {
-            "webp": "./images/avatars/user.jpg"
-          },
-          "username": user
-        },
-        "replies": [],
-        "replyingTo": repliedTo
-      }])
-      setPostId(a => a + 1)
+     
     } else {//for adding replies
-      const newArr = comments
-      const newReplies = newArr[replyingToId - 1].replies
-      newArr[replyingToId - 1].replies = [...newReplies, {
-        "id": id,
-        "content": entry.replace(/@\[/g, "").replace(/]/g, "").replace(/@\w+/g, (replaceWithLink)),
-        "createdTime": postTime,
-        "score": 0,
-        "user": {
-          "image": {
-            "webp": "./images/avatars/user.jpg"
-          },
-          "username": user
-        },
-        "replies": [],
-        "replyingTo": repliedTo,
-        "replyingToId": replyingToId
-      }]
-      setComments(newArr)
       setRepliedTo('')
       setReplyTo('')
-      setRender(a => !a)
     }
     setEntry('')
-    setId(a => a + 1)
+    // setId(a => a + 1)
   }
 
   return (
     <>
-    <Form setForm={setForm} setUser={setUser} nameCont={nameCont} acceptUser={acceptUser} />
+    {!isLoggedIn ? (<Form nameCont={nameCont} acceptUser={acceptUser} />) : null}
     <div className='min-h-screen h-fit min-w-screen w-full px-6 py-8 bg-[#f5f6fa] flex flex-col items-center'>
-      {comments.sort((a, b) => b - a).map((comment, id) => {
+      {comments?.sort((a, b) => b - a).map((comment, id) => {
         return (
           <div className='w-full max-w-3xl'>
-          <CommentCard comment={comment} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} user={user} />
+          <CommentCard comment={comment} key={id} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} ws={ws} />
           {comment.replies.map((reply, id) => {
             return (
               <div className='flex h-fit'>
                 <div className='w-[0.2rem] mr-[0.9rem] bg-[#67727e2f] text-[1px]'>.</div>
                 <div className='flex flex-col w-full'>
-                  <CommentCard comment={reply} key={id} setChat={setChat} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} user={user} setRender={setRender} />
+                  <CommentCard comment={reply} key={id} comments={comments} setComments={setComments} replyClick={replyClick} setReplyTo={setReplyTo} setRepliedTo={setRepliedTo} setReplyingToId={setReplyingToId} users={users} addComment={addComment} entry={entry} setEntry={setEntry} setMainInp={setMainInp} setRender={setRender} ws={ws} />
                 </div>
               </div>
             )
@@ -169,22 +287,6 @@ function App() {
         </div>
       </div>
     </div>
-    </>
-  )
-}
-
-function Form(props) {
-  return (
-    <>
-      <div className="bg-[#f5f6fa] w-screen h-screen flex items-center justify-center fixed top-0 z-50 nameCont" ref={props.nameCont}>
-          <div className="bg-white rounded-lg p-8 w-80 gap-y-16 flex flex-col justify-between text-center shadow shadow-slate-700 focus:outline-none userInp">
-              <h1 className="font-rubik text-3xl font-semibold text text-[#324152]">Username</h1>
-              <input className="font-rubik text-[#67727e] border-[#67727e2f] border-2 w-full h-12 rounded-lg bg-white p-2" placeholder="Enter your username..." onChange={(e) => {props.setUser(e.target.value)}} />
-              <button className="h-10 w-full rounded-lg bg-[#5457b6] font-rubik text-xl font-semibold flex items-center justify-center hover:cursor-pointer hover:opacity-50" onClick={() => {props.acceptUser()}}>Comment</button>
-          </div>
-      </div>
-      <div className="bg-[#afb9df] w-screen h-screen fixed top-0 z-40 nameCont"></div>
-      <div className="bg-[#7283c9] w-screen h-screen fixed top-0 z-30 nameCont"></div>
     </>
   )
 }
